@@ -10,7 +10,8 @@ module.exports = {
     '@/tests/(.*)': '<rootDir>/tests/$1',
     '@/(.*)': '<rootDir>/src/$1'
   },
-  setupFilesAfterEnv: ['jest-extended'],
+  modulePathIgnorePatterns: ["storage.json"],
+  setupFilesAfterEnv: ['jest-extended', './tests/setup.ts'],
   globals: {
     'ts-jest': {
       diagnostics: false,
