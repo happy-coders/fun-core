@@ -10,6 +10,7 @@ module.exports = {
     '@/tests/(.*)': '<rootDir>/tests/$1',
     '@/(.*)': '<rootDir>/src/$1'
   },
+  setupFilesAfterEnv: ['jest-extended'],
   globals: {
     'ts-jest': {
       diagnostics: false,
