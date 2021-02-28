@@ -1,43 +1,50 @@
 import { Project } from '@/entities';
 import { ProjectsRepository } from '@/use-cases/ports/projects-repository';
-import { Storage } from '@/external/storage/storage';
+import { Storage } from '@/external/storage';
 
 export class StorageProjectsRepository implements ProjectsRepository {
-  private static readonly BASE_FILE = 'projects.json';
-  private projects: Project[] = [];
-  private projectsFilePath: string;
-
   private static instance: StorageProjectsRepository = null;
 
-  private constructor(
-    private readonly path: string,
-    private readonly storage: Storage,
-  ) {}
+  private readonly BASE_FILE = 'projects.json';
+
+  private projectsFilePath: string;
+  private projects: Project[] = [];
+
+  private constructor(path: string, private readonly storage: Storage) {
+    this.projectsFilePath = this._normalizePath(path) + this.BASE_FILE;
+  }
+
+  private _normalizePath(path: string) {
+    return path.endsWith('/') ? path : `${path}/`;
+  }
 
   static async getInstance(
     path: string,
     storage: Storage,
   ): Promise<StorageProjectsRepository> {
     if (!this.instance) {
-      const filePath = this._normalizePath(path) + this.BASE_FILE;
-
       const repository = new StorageProjectsRepository(path, storage);
-      repository.projectsFilePath = filePath;
 
-      let fileContent = await storage.loadContent(filePath);
-
+      let fileContent = await storage.loadContent(repository.projectsFilePath);
       if (fileContent === undefined) {
         fileContent = this._fileFreshContent();
-        await storage.save(filePath, fileContent);
+        await storage.save(repository.projectsFilePath, fileContent);
       }
 
-      // TODO: Create Serializer abstraction
-      repository.projects = JSON.parse(fileContent);
+      repository._setProjectsFromFileContent(fileContent);
 
       this.instance = repository;
     }
 
     return this.instance;
+  }
+
+  private static _fileFreshContent() {
+    return JSON.stringify([]);
+  }
+
+  private _setProjectsFromFileContent(content: string) {
+    this.projects = JSON.parse(content);
   }
 
   static dropInstance() {
@@ -57,16 +64,5 @@ export class StorageProjectsRepository implements ProjectsRepository {
     );
 
     return project;
-  }
-
-  private static _fileFreshContent() {
-    return JSON.stringify([]);
-  }
-
-  private static _normalizePath(path: string) {
-    if (path.substr(-1) === '/') {
-      return path;
-    }
-    return `${path}/`;
   }
 }
