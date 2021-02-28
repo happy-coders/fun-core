@@ -15,6 +15,8 @@ export class CreateProject {
       return left(new ProjectAlreadyExists(name));
     }
 
-    return right(new Project(name, path));
+    const project = await this.projectsRepository.save(new Project(name, path));
+
+    return right(project);
   }
 }
