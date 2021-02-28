@@ -6,7 +6,7 @@ import { ProjectsRepository } from '@/use-cases/ports/projects-repository';
 const makeUseCase = () => {
   const projectsRepository: ProjectsRepository = {
     findByName: jest.fn(),
-    save: jest.fn(),
+    create: jest.fn(),
   };
   const useCase = new CreateProject(projectsRepository);
 
@@ -39,7 +39,7 @@ describe('CreateProjectUseCase', () => {
       existentProject.name,
     );
 
-    expect(projectsRepository.save).not.toHaveBeenCalled();
+    expect(projectsRepository.create).not.toHaveBeenCalled();
   });
 
   it('should create the project when not exists', async () => {
@@ -53,7 +53,7 @@ describe('CreateProjectUseCase', () => {
     const source = '~/Desktop';
 
     const newProject = new Project(name, source);
-    jest.spyOn(projectsRepository, 'save').mockResolvedValueOnce(newProject);
+    jest.spyOn(projectsRepository, 'create').mockResolvedValueOnce(newProject);
 
     const result = await useCase.create(name, source);
 
@@ -65,7 +65,7 @@ describe('CreateProjectUseCase', () => {
     expect(createdProject.name).toBe(name);
     expect(createdProject.source).toBe(source);
 
-    expect(projectsRepository.save).toHaveBeenCalledTimes(1);
-    expect(projectsRepository.save).toHaveBeenCalledWith(newProject);
+    expect(projectsRepository.create).toHaveBeenCalledTimes(1);
+    expect(projectsRepository.create).toHaveBeenCalledWith(newProject);
   });
 });

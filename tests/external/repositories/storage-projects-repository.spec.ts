@@ -1,6 +1,6 @@
 import { Project } from '@/entities';
-import { Storage } from '@/external/storage/storage';
-import { StorageProjectsRepository } from '@/external/repositories/storage-projects-repository';
+import { Storage } from '@/external/storage';
+import { StorageProjectsRepository } from '@/external/repositories';
 
 const fakePath = '/var/www/html';
 
@@ -113,6 +113,66 @@ describe('StorageProjectsRepository', () => {
       const result = await repository.findByName(project.name);
 
       expect(result).toEqual(project);
+    });
+  });
+
+  describe('create', () => {
+    afterEach(() => {
+      StorageProjectsRepository.dropInstance();
+    });
+
+    it('should create the project when projects list is empty', async () => {
+      const basePath = '~/Desktop';
+      const { repository, storage } = await makeRepository({
+        loadContentResult: '[]',
+        path: basePath,
+      });
+
+      const project = new Project('funny', '~/Projects/funny');
+
+      const savedProject = await repository.create(project);
+      expect(savedProject).toEqual(project);
+
+      expect(storage.save).toHaveBeenCalledTimes(1);
+      expect(storage.save).toHaveBeenCalledWith(
+        `${basePath}/projects.json`,
+        JSON.stringify([project]),
+      );
+
+      const recentlySavedProject = await repository.findByName(project.name);
+      expect(recentlySavedProject).toBeDefined();
+      expect(recentlySavedProject).toEqual(project);
+    });
+
+    it('should add the project and hold the other existent projects', async () => {
+      const existentProject = new Project('funniest', '~/Projects/funniest');
+
+      const basePath = '~/Desktop';
+      const { repository, storage } = await makeRepository({
+        loadContentResult: JSON.stringify([existentProject]),
+        path: basePath,
+      });
+
+      const project = new Project('funny', '~/Projects/funny');
+
+      const savedProject = await repository.create(project);
+      expect(savedProject).toEqual(project);
+
+      expect(storage.save).toHaveBeenCalledTimes(1);
+      expect(storage.save).toHaveBeenCalledWith(
+        `${basePath}/projects.json`,
+        JSON.stringify([existentProject, project]),
+      );
+
+      const recentlySavedProject = await repository.findByName(project.name);
+      expect(recentlySavedProject).toBeDefined();
+      expect(recentlySavedProject).toEqual(project);
+
+      const existentProjectFound = await repository.findByName(
+        existentProject.name,
+      );
+      expect(existentProjectFound).toBeDefined();
+      expect(existentProjectFound).toEqual(existentProject);
     });
   });
 });

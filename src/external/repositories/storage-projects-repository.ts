@@ -5,6 +5,7 @@ import { Storage } from '@/external/storage/storage';
 export class StorageProjectsRepository implements ProjectsRepository {
   private static readonly BASE_FILE = 'projects.json';
   private projects: Project[] = [];
+  private projectsFilePath: string;
 
   private static instance: StorageProjectsRepository = null;
 
@@ -18,9 +19,11 @@ export class StorageProjectsRepository implements ProjectsRepository {
     storage: Storage,
   ): Promise<StorageProjectsRepository> {
     if (!this.instance) {
-      const repository = new StorageProjectsRepository(path, storage);
-
       const filePath = this._normalizePath(path) + this.BASE_FILE;
+
+      const repository = new StorageProjectsRepository(path, storage);
+      repository.projectsFilePath = filePath;
+
       let fileContent = await storage.loadContent(filePath);
 
       if (fileContent === undefined) {
@@ -43,6 +46,17 @@ export class StorageProjectsRepository implements ProjectsRepository {
 
   async findByName(name: string): Promise<Project | undefined> {
     return this.projects.find(project => project.name === name);
+  }
+
+  async create(project: Project): Promise<Project> {
+    this.projects.push(project);
+
+    await this.storage.save(
+      this.projectsFilePath,
+      JSON.stringify(this.projects),
+    );
+
+    return project;
   }
 
   private static _fileFreshContent() {
