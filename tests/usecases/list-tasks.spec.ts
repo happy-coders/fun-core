@@ -9,6 +9,7 @@ type MakeUseCaseOptions = {
 const makeUseCase = ({ getAllResult }: MakeUseCaseOptions) => {
   const repository: TasksRepository = {
     getAll: jest.fn().mockResolvedValue(getAllResult),
+    findByName: jest.fn(),
   };
 
   const useCase = new ListTasks(repository);
