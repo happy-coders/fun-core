@@ -16,7 +16,7 @@ const makeUseCase = ({ getAllResult }: MakeUseCaseOptions) => {
   return { useCase, repository };
 };
 
-describe('List tasks', () => {
+describe('ListTasksUseCase', () => {
   it('should return an empty list when not exists tasks', async () => {
     const { useCase, repository } = makeUseCase({ getAllResult: [] });
     const tasks = await useCase.list();
