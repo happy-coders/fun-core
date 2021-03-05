@@ -63,7 +63,7 @@ describe('CreateProjectUseCase', () => {
     const createdProject = result.value as Project;
 
     expect(createdProject.name).toBe(name);
-    expect(createdProject.source).toBe(source);
+    expect(createdProject.path).toBe(source);
 
     expect(projectsRepository.create).toHaveBeenCalledTimes(1);
     expect(projectsRepository.create).toHaveBeenCalledWith(newProject);
