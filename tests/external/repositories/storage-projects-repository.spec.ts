@@ -103,7 +103,7 @@ describe('StorageProjectsRepository', () => {
     });
 
     it('should return the project when exists', async () => {
-      const project = new Project('Fun', fakePath);
+      const project = new Project('Fun', fakePath, []);
       const projects = [project];
 
       const { repository } = await makeRepository({
@@ -128,7 +128,7 @@ describe('StorageProjectsRepository', () => {
         path: basePath,
       });
 
-      const project = new Project('funny', '~/Projects/funny');
+      const project = new Project('funny', '~/Projects/funny', []);
 
       const savedProject = await repository.create(project);
       expect(savedProject).toEqual(project);
@@ -145,7 +145,11 @@ describe('StorageProjectsRepository', () => {
     });
 
     it('should add the project and hold the other existent projects', async () => {
-      const existentProject = new Project('funniest', '~/Projects/funniest');
+      const existentProject = new Project(
+        'funniest',
+        '~/Projects/funniest',
+        [],
+      );
 
       const basePath = '~/Desktop';
       const { repository, storage } = await makeRepository({
@@ -153,7 +157,7 @@ describe('StorageProjectsRepository', () => {
         path: basePath,
       });
 
-      const project = new Project('funny', '~/Projects/funny');
+      const project = new Project('funny', '~/Projects/funny', []);
 
       const savedProject = await repository.create(project);
       expect(savedProject).toEqual(project);
